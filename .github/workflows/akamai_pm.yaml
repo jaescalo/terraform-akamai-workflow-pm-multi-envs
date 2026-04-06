@@ -1,0 +1,159 @@
+name: Akamai Property Manager
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'One or more environments, comma-separated, matching folders under environments/ (e.g. app1 or app1,app2). Use ALL to target every environment. Ignored if triggered by a push.'
+        required: true
+        type: string
+  push:
+    branches:
+      - main
+    paths:
+      - 'environments/**'
+      - 'modules/property/rules/**'
+
+env:
+  AKAMAI_CLIENT_SECRET: "${{ secrets.AKAMAI_CREDENTIAL_CLIENT_SECRET }}"
+  AKAMAI_HOST: "${{ secrets.AKAMAI_CREDENTIAL_HOST }}"
+  AKAMAI_ACCESS_TOKEN: "${{ secrets.AKAMAI_CREDENTIAL_ACCESS_TOKEN }}"
+  AKAMAI_CLIENT_TOKEN: "${{ secrets.AKAMAI_CREDENTIAL_CLIENT_TOKEN }}"
+  AKAMAI_ACCOUNT_KEY: "${{ secrets.AKAMAI_ACCOUNT_KEY}}"
+  TF_VAR_version_notes: "${{ github.repository }} run #${{ github.run_number }} Commit ${{ github.sha }}"
+  BASE_DIR: "."
+  # Work-around to support remote S3 backend on TF versions 1.11+
+  AWS_REQUEST_CHECKSUM_CALCULATION: "when_required"
+  TF_VERSION: "1.12.1"
+
+jobs:
+  setup:
+    name: Prepare Environment Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Build and Validate Environment Matrix
+        id: set-matrix
+        run: |
+          VALID_ENVS="[]"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger: parse comma-separated input, or ALL to target every environment
+            INPUT="${{ inputs.environment }}"
+            if echo "$INPUT" | grep -iqE '^all$'; then
+              echo "ALL keyword detected. Targeting all environments."
+              for dir in environments/*/; do
+                ENV=$(basename "$dir")
+                VALID_ENVS=$(echo "$VALID_ENVS" | jq --arg e "$ENV" '. + [$e]')
+              done
+            else
+              ERRORS=0
+              while IFS= read -r ENV; do
+                ENV=$(echo "$ENV" | tr -d ' ')
+                [ -z "$ENV" ] && continue
+                if [ ! -d "environments/$ENV" ]; then
+                  echo "::error::Environment '$ENV' not found. Available environments: $(ls environments/ | tr '\n' ' ')"
+                  ERRORS=1
+                else
+                  VALID_ENVS=$(echo "$VALID_ENVS" | jq --arg e "$ENV" '. + [$e]')
+                fi
+              done <<< "$(echo "$INPUT" | tr ',' '\n')"
+              if [ "$ERRORS" -ne 0 ]; then
+                exit 1
+              fi
+            fi
+          else
+            # Push trigger: if rules changed, target all environments; otherwise use git diff on environments/
+            RULES_CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'modules/property/rules/' | head -1)
+            if [ -n "$RULES_CHANGED" ]; then
+              echo "::notice::Rules changes detected. Targeting all environments."
+              for dir in environments/*/; do
+                ENV=$(basename "$dir")
+                VALID_ENVS=$(echo "$VALID_ENVS" | jq --arg e "$ENV" '. + [$e]')
+              done
+            else
+              CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'environments/' \
+                | grep -oP '^environments/\K[^/]+' \
+                | sort -u)
+              if [ -z "$CHANGED" ]; then
+                echo "::notice::No environment folders changed in this push. Nothing to deploy."
+              fi
+              while IFS= read -r ENV; do
+                [ -z "$ENV" ] && continue
+                VALID_ENVS=$(echo "$VALID_ENVS" | jq --arg e "$ENV" '. + [$e]')
+              done <<< "$CHANGED"
+            fi
+          fi
+
+          echo "Environments to deploy: $(echo "$VALID_ENVS" | jq -r '.[]' | tr '\n' ' ')"
+          echo "matrix=$(echo "$VALID_ENVS" | jq -c '{environment: .}')" >> $GITHUB_OUTPUT
+
+  create-property:
+    name: Onboard ${{ matrix.environment }}
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+      fail-fast: false
+    env:
+      ENV: ${{ matrix.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Summarize Run Target
+        run: |
+          echo "### Onboarding environment: \`$ENV\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }} | **Run:** #${{ github.run_number }} | **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Add Linode S3 Backend for Terraform
+        run: |
+          cat << EOF > $BASE_DIR/backend
+          skip_credentials_validation=true
+          skip_region_validation=true
+          skip_requesting_account_id=true
+          skip_s3_checksum=true
+          bucket="${{ secrets.LINODE_OBJECT_STORAGE_BUCKET }}"
+          key="$ENV-terraform.tfstate"
+          region="us-mia-1"
+          endpoints={ s3 = "https://us-mia-1.linodeobjects.com" }
+          access_key="${{ secrets.LINODE_OBJECT_STORAGE_ACCESS_KEY }}"
+          secret_key="${{ secrets.LINODE_OBJECT_STORAGE_SECRET_KEY }}"
+          EOF
+
+      - name: Terraform Init
+        run: terraform init -backend-config=$BASE_DIR/backend
+
+      # The import step is optional and used only once to import existing resources to TF. 
+      # - name: Terraform Import
+      #   run: sh import.sh $ENV
+
+      - name: Terraform Validate
+        run: terraform -chdir=$BASE_DIR validate -no-color
+
+      - name: Terraform Save Plan
+        run: |
+          terraform -chdir=$BASE_DIR plan -var-file=./environments/$ENV/terraform.tfvars -out=tfplan
+          terraform -chdir=$BASE_DIR show -json tfplan > $BASE_DIR/tfplan.json
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          terraform -chdir=$BASE_DIR show -no-color tfplan >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # - name: Terraform Apply Changes
+      #   run: terraform -chdir=$BASE_DIR apply -var-file=./environments/$ENV/terraform.tfvars -auto-approve
+
+      # - name: Store Terraform Plan as Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Terraform Plan - ${{ matrix.environment }}
+      #     path: tfplan.json

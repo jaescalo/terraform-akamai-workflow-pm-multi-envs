@@ -65,11 +65,9 @@ variable "activation_config" {
   type = object({
     staging = object({
       contacts = list(string)
-      note     = string
     })
     production = object({
       contacts = list(string)
-      note     = string
     })
   })
 }

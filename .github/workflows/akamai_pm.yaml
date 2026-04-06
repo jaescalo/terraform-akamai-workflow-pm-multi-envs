@@ -94,7 +94,7 @@ jobs:
           echo "matrix=$(echo "$VALID_ENVS" | jq -c '{environment: .}')" >> $GITHUB_OUTPUT
 
   create-property:
-    name: Onboard ${{ matrix.environment }}
+    name: Env ${{ matrix.environment }}
     needs: setup
     runs-on: ubuntu-latest
     strategy:
@@ -108,7 +108,7 @@ jobs:
 
       - name: Summarize Run Target
         run: |
-          echo "### Onboarding environment: \`$ENV\`" >> $GITHUB_STEP_SUMMARY
+          echo "### Working on environment: \`$ENV\`" >> $GITHUB_STEP_SUMMARY
           echo "**Triggered by:** ${{ github.actor }} | **Run:** #${{ github.run_number }} | **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Setup Terraform

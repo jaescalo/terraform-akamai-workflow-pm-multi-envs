@@ -124,7 +124,7 @@ jobs:
           skip_requesting_account_id=true
           skip_s3_checksum=true
           bucket="${{ secrets.LINODE_OBJECT_STORAGE_BUCKET }}"
-          key="$ENV-terraform.tfstate"
+          key="my-states/$ENV-terraform.tfstate"
           region="us-mia-1"
           endpoints={ s3 = "https://us-mia-1.linodeobjects.com" }
           access_key="${{ secrets.LINODE_OBJECT_STORAGE_ACCESS_KEY }}"

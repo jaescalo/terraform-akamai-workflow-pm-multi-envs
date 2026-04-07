@@ -2,26 +2,22 @@ contract_id = "ctr_1-1NC95D"
 group_id    = "grp_71960"
 
 property_config = {
-  name       = "app1.jaescalo.online"
+  name       = "gitops-prod.demo.com"
   product_id = "prd_Fresca"
 }
 
 edge_hostnames = {
-  "wildcard-jaescalo-online-edgekey-net" = {
+  "jaescalo-test-edgekey-net" = {
     ip_behavior   = "IPV6_COMPLIANCE"
-    edge_hostname = "wildcard.jaescalo.online.edgekey.net"
-    certificate   = 4161
+    edge_hostname = "jaescalo.test.edgekey.net"
   }
 }
 
 property_hostnames = {
-  "app1.jaescalo.online" = {
-    cname_from             = "app1.jaescalo.online"
-    cname_to               = "wildcard.jaescalo.online.edgekey.net"
-    cert_provisioning_type = "CCM"
-    ccm_certificates = {
-      ecdsa_cert_id = "4161"
-    }
+  "gitops-prod.demo.com" = {
+    cname_from             = "gitops-prod.demo.com"
+    cname_to               = "jaescalo.test.edgekey.net"
+    cert_provisioning_type = "CPS_MANAGED"
   }
 }
 
@@ -41,7 +37,7 @@ rule_variables = {
     sensitive   = false
   }
 }
-rule_default_origin_hostname = "app1-origin.jaescalo.online"
+rule_default_origin_hostname = "origin-gitops-prod.demo.com"
 rule_traffic_reporting_cp_code = 407946
 
 activation_config = {
@@ -54,7 +50,7 @@ activation_config = {
 }
 
 activate_latest_on_staging = true
-activate_latest_on_production = true
+activate_latest_on_production = false
 
-import_property_id = "prp_833332,ctr_1-1NC95D,grp_71960,1"
-import_ehn_id = "ehn_6169908,ctr_1-1NC95D,grp_71960"
+import_property_id = "prp_833332,ctr_1-1NC95D,grp_71960,17"
+import_ehn_id = "ehn_4874468,ctr_1-1NC95D,grp_71960"

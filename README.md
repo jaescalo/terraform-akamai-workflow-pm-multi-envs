@@ -1,4 +1,4 @@
-[![Akamai Property Manager](https://github.com/jaescalo/akamai-pm-tf-multiple-env-workflow/actions/workflows/akamai_pm.yaml/badge.svg)](https://github.com/jaescalo/akamai-pm-tf-multiple-env-workflow/actions/workflows/akamai_pm.yaml)
+[![Akamai Property Manager](https://github.com/jaescalo/terraform-akamai-workflow-pm-multi-envs/actions/workflows/akamai_pm.yaml/badge.svg)](https://github.com/jaescalo/terraform-akamai-workflow-pm-multi-envs/actions/workflows/akamai_pm.yaml)
 
 # Akamai Property Manager — Multi-Environment
 

@@ -103,6 +103,8 @@ jobs:
       # max-parallel: 2 # Uncomment to limit concurrency if hitting API rate limits
     env:
       ENV: ${{ matrix.environment }}
+      TF_LOG: DEBUG
+      TF_LOG_PATH: /tmp/tf-debug.log
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -156,6 +158,10 @@ jobs:
 
       - name: Terraform Apply Changes
         run: terraform -chdir=$BASE_DIR apply -var-file=./environments/$ENV/terraform.tfvars -auto-approve
+
+      - name: API Call Rate Summary
+        if: always()
+        run: bash scripts/api_rate_summary.sh /tmp/tf-debug.log "$ENV"
 
       # - name: Store Terraform Plan as Artifact
       #   uses: actions/upload-artifact@v4

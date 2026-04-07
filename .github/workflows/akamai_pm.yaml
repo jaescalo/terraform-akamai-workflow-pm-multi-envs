@@ -149,8 +149,8 @@ jobs:
           terraform -chdir=$BASE_DIR show -no-color tfplan >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-      # - name: Terraform Apply Changes
-      #   run: terraform -chdir=$BASE_DIR apply -var-file=./environments/$ENV/terraform.tfvars -auto-approve
+      - name: Terraform Apply Changes
+        run: terraform -chdir=$BASE_DIR apply -var-file=./environments/$ENV/terraform.tfvars -auto-approve
 
       # - name: Store Terraform Plan as Artifact
       #   uses: actions/upload-artifact@v4

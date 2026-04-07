@@ -36,4 +36,10 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Backend override files
+backend.hcl
+
+# Log files
+*.log   
+
 .DS_Store

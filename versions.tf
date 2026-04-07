@@ -15,3 +15,8 @@ terraform {
   # See the ./github/workflows/akamai_pm.yaml.
   backend "s3" {}
 }
+
+# provider "akamai" {
+#   edgerc = "~/.edgerc"
+#   config_section = "tf"
+# }

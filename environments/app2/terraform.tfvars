@@ -46,12 +46,10 @@ rule_traffic_reporting_cp_code = 1271126
 
 activation_config = {
   staging = {
-    contacts = []
-    note     = ""
+    contacts = ["noreply@akamai.com"]
   }
   production = {
-    contacts = []
-    note     = ""
+    contacts = ["noreply@akamai.com"]
   }
 }
 

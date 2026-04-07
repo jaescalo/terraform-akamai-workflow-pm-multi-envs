@@ -6,6 +6,6 @@ import {
 }
 
 import {
-  to = module.property.akamai_edge_hostname.edge_hostnames
+  to = module.property.akamai_edge_hostname.edge_hostnames["wildcard-jaescalo-online-edgekey-net"]
   id = var.import_ehn_id
 }

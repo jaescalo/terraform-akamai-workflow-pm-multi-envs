@@ -14,8 +14,8 @@ edge_hostnames = {
 }
 
 property_hostnames = {
-  "gitops-dev.demo.com" = {
-    cname_from             = "gitops-dev.demo.com"
+  "gitops-dev.jaescalo.online" = {
+    cname_from             = "gitops-dev.jaescalo.online"
     cname_to               = "jaescalo.test.edgekey.net"
     cert_provisioning_type = "CPS_MANAGED"
   }

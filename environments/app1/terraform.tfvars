@@ -2,7 +2,7 @@ contract_id = "ctr_1-1NC95D"
 group_id    = "grp_71960"
 
 property_config = {
-  name       = "temp-template"
+  name       = "gitops-prod.demo.com"
   product_id = "prd_Fresca"
 }
 
@@ -53,9 +53,8 @@ activation_config = {
   }
 }
 
-version_notes = ""
+activate_latest_on_staging = true
+activate_latest_on_production = true
 
-activate_latest_on_staging = false
-activate_latest_on_production = false
-
-import_property_id = "prp_1338815,ctr_1-1NC95D,grp_71960,1"
+import_property_id = "prp_833331,ctr_1-1NC95D,grp_71960,1"
+import_ehn_id = "ehn_6169908,ctr_1-1NC95D,grp_71960"

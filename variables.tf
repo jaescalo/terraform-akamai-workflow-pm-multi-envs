@@ -99,3 +99,8 @@ variable "import_property_id" {
   type = string
   default = ""
 }
+
+variable "import_ehn_id" {
+  type = string
+  default = ""
+}

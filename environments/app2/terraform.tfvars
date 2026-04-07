@@ -7,12 +7,17 @@ property_config = {
 }
 
 edge_hostnames = {
+  "wildcard-jaescalo-online-edgekey-net" = {
+    ip_behavior   = "IPV6_COMPLIANCE"
+    edge_hostname = "wildcard.jaescalo.online.edgekey.net"
+    certificate   = 4161
+  }
 }
 
 property_hostnames = {
   "app1.jaescalo.online" = {
-    cname_from             = "app1.jaescalo.online"
-    cname_to               = "app1.jaescalo.online.edgekey.net"
+    cname_from             = "app2.jaescalo.online"
+    cname_to               = "wildcard.jaescalo.online.edgekey.net"
     cert_provisioning_type = "CCM"
     ccm_certificates = {
       ecdsa_cert_id = "4161"
@@ -37,7 +42,7 @@ rule_variables = {
   }
 }
 rule_default_origin_hostname = "app1-origin.jaescalo.online"
-rule_traffic_reporting_cp_code = 407946
+rule_traffic_reporting_cp_code = 1271126
 
 activation_config = {
   staging = {
@@ -50,7 +55,7 @@ activation_config = {
   }
 }
 
-version_notes = ""
+activate_latest_on_staging = true
+activate_latest_on_production = true
 
-activate_latest_on_staging = false
-activate_latest_on_production = false
+import_property_id = "prp_6169908,ctr_1-1NC95D,grp_71960,1"

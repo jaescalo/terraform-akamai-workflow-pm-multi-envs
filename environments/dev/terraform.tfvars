@@ -49,8 +49,8 @@ activation_config = {
   }
 }
 
-activate_latest_on_staging = false
-activate_latest_on_production = false
+activate_latest_on_staging = true
+activate_latest_on_production = true
 
 import_property_id = "prp_833331,ctr_1-1NC95D,grp_71960,43"
 import_ehn_id = "ehn_4874468,ctr_1-1NC95D,grp_71960"

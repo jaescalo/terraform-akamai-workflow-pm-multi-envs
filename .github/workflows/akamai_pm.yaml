@@ -145,7 +145,7 @@ jobs:
         run: |
           terraform -chdir=$BASE_DIR plan -var-file=./environments/$ENV/terraform.tfvars -out=tfplan
           terraform -chdir=$BASE_DIR show -json tfplan > $BASE_DIR/tfplan.json
-          echo '<details><summary>Terraform Plan Output</summary>' >> $GITHUB_STEP_SUMMARY
+          echo "<details><summary>Terraform Plan Output - $ENV</summary>" >> $GITHUB_STEP_SUMMARY
           echo '' >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           terraform -chdir=$BASE_DIR show -no-color tfplan >> $GITHUB_STEP_SUMMARY

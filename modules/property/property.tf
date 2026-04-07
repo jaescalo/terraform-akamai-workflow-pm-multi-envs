@@ -97,6 +97,12 @@ resource "akamai_property_activation" "ion-standard-activation-production" {
   note                           = var.version_notes
   auto_acknowledge_rule_warnings = true
 
+  compliance_record {
+    noncompliance_reason_no_production_traffic {
+      ticket_id = "123"
+    }
+  }
+  
   lifecycle {
     ignore_changes = [
       note

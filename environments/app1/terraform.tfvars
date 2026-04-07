@@ -2,7 +2,7 @@ contract_id = "ctr_1-1NC95D"
 group_id    = "grp_71960"
 
 property_config = {
-  name       = "gitops-prod.demo.com"
+  name       = "app1.jaescalo.online"
   product_id = "prd_Fresca"
 }
 

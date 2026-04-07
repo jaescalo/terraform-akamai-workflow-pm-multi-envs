@@ -2,7 +2,7 @@ contract_id = "ctr_1-1NC95D"
 group_id    = "grp_71960"
 
 property_config = {
-  name       = "temp-template"
+  name       = "app2.jaescalo.online"
   product_id = "prd_Fresca"
 }
 
@@ -15,7 +15,7 @@ edge_hostnames = {
 }
 
 property_hostnames = {
-  "app1.jaescalo.online" = {
+  "app2.jaescalo.online" = {
     cname_from             = "app2.jaescalo.online"
     cname_to               = "wildcard.jaescalo.online.edgekey.net"
     cert_provisioning_type = "CCM"
@@ -41,7 +41,7 @@ rule_variables = {
     sensitive   = false
   }
 }
-rule_default_origin_hostname = "app1-origin.jaescalo.online"
+rule_default_origin_hostname = "app2-origin.jaescalo.online"
 rule_traffic_reporting_cp_code = 1271126
 
 activation_config = {

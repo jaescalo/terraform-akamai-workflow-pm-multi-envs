@@ -21,14 +21,7 @@ resource "akamai_edge_hostname" "edge_hostnames" {
   group_id      = var.group_id
   ip_behavior   = each.value.ip_behavior
   edge_hostname = each.value.edge_hostname
-  certificate   = try(each.value.certificate, null)
   ttl           = try(each.value.ttl, null)
-  
-  lifecycle {
-    ignore_changes = [ 
-      certificate
-    ]
-  }
 }
 
 resource "akamai_property" "ion_standard" {

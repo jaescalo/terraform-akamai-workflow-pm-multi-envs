@@ -88,7 +88,7 @@ data "akamai_property_rules_builder" "ion_standard_rule_css_and_java_script" {
       caching {
         behavior        = "MAX_AGE"
         must_revalidate = false
-        ttl             = "7d"
+        ttl             = "8d"
       }
     }
   }

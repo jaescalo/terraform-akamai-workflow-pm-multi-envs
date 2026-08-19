@@ -10,18 +10,30 @@ LOG_FILE="${1:-/tmp/tf-debug.log}"
 ENV_NAME="${2:-unknown}"
 SUMMARY_FILE="${GITHUB_STEP_SUMMARY:-}"
 
+# gawk supports 3-arg match(); BSD awk (macOS) requires POSIX fallback
+AWK_BIN=$(command -v gawk 2>/dev/null || echo awk)
+
 if [ ! -f "$LOG_FILE" ]; then
   echo "No debug log found at $LOG_FILE — skipping API rate summary."
   exit 0
 fi
 
 TABLE=$(
-  grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}[^(]*(GET|POST|PUT|DELETE|PATCH) https?://[^/]+(/[^/?[:space:]]+)' "$LOG_FILE" \
-    | awk '
+  grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}[^(]*(GET|POST|PUT|DELETE|PATCH) https?://[^/]*\.luna\.akamaiapis\.net(/[^/?[:space:]]*)' "$LOG_FILE" \
+    | $AWK_BIN '
       {
-        match($0, /([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2})/, t)
-        match($0, /(GET|POST|PUT|DELETE|PATCH) https?:\/\/[^\/]+(\/[^\/\/?[:space:]]+)/, u)
-        if (t[1] != "" && u[2] != "") counts[t[1] "|" u[2]]++
+        timestamp = substr($0, 1, 16)
+        endpoint = ""
+        for (i = 1; i <= NF; i++) {
+          if ($i ~ /^https?:\/\/[^\/]*\.luna\.akamaiapis\.net\//) {
+            path = $i
+            sub(/^https?:\/\/[^\/]*\.luna\.akamaiapis\.net/, "", path)
+            match(path, /\/[^\/\/?[:space:]]+/)
+            if (RSTART > 0) endpoint = substr(path, RSTART, RLENGTH)
+            break
+          }
+        }
+        if (endpoint != "") counts[timestamp "|" endpoint]++
       }
       END {
         for (k in counts) {
